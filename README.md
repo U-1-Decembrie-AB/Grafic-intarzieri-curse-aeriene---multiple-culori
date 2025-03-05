@@ -2,8 +2,9 @@
 
 This repository contains a script that processes airline delay data and creates a bar chart showing the average delay per month in gradient colors.
 
-Above average is red and the intensity grows the higher it is
-Below average is blue and the intensity grows the lower it is
+Above average the bar is red and the intensity grows the higher it is
+
+Below average the bar is blue and the intensity grows the lower it is
 
 ## Instructions
 
