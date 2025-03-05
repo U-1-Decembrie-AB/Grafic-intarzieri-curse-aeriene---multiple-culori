@@ -1,0 +1,82 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as mpatches
+
+# 1. Load data from the CSV file
+df = pd.read_csv('DelayedFlights.csv')
+
+# 2. Select only the columns of interest (Month, ArrDelay)
+#    and remove records with no delays (null).
+df = df[['Month', 'ArrDelay']].dropna(subset=['ArrDelay'])
+
+# 3. Calculate the average delay for each month
+monthly_avg = df.groupby('Month')['ArrDelay'].mean()
+
+# 4. Sort the values by month (if not already in order 1-12)
+monthly_avg = monthly_avg.sort_index()
+
+# 5. Define the month labels
+months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+# 6. Calculate the overall average delay across all months
+overall_avg = monthly_avg.mean()
+
+# 7. Compute the difference of each month relative to the overall average
+diffs = monthly_avg - overall_avg
+min_diff = diffs.min()
+max_diff = diffs.max()
+
+# 8. Obtain the colormaps for blue and red
+cmap_blue = plt.get_cmap('Blues')
+cmap_red = plt.get_cmap('Reds')
+
+colors = []
+for val in monthly_avg:
+    diff = val - overall_avg
+    if diff < 0:
+        if min_diff < 0:
+            norm_val = diff / min_diff
+        else:
+            norm_val = 0
+        scaled_val = 0.2 + 0.6 * norm_val
+        color = cmap_blue(scaled_val)
+    else:
+        if max_diff > 0:
+            norm_val = diff / max_diff
+        else:
+            norm_val = 0
+        scaled_val = 0.2 + 0.6 * norm_val
+        color = cmap_red(scaled_val)
+    colors.append(color)
+
+# 9. Create the figure and axis
+plt.figure(figsize=(10, 6))
+
+# 10. Draw the bar chart with the specified gradient colors
+bars = plt.bar(months_labels, monthly_avg, color=colors)
+
+# 11. Add labels above each bar showing the delay values
+for i, v in enumerate(monthly_avg):
+    plt.text(i, v + 0.5, f"{v:.1f}", ha='center', fontsize=9)
+
+# 12. Draw a line representing the overall average delay
+plt.axhline(overall_avg, color='gray', linestyle='--')
+plt.text(8.5, overall_avg + 0.8,
+         f"Average = {overall_avg:.1f}",
+         color='black', fontsize=10, fontstyle='italic')
+
+# 13. Set the label for the y-axis and enable the grid
+plt.ylabel("Întârzieri (minute)", fontsize=12)
+plt.grid(axis='y', alpha=0.5)
+
+# 14. Add a simple legend *outside* the top right of the graph
+below_patch = mpatches.Patch(color=cmap_blue(0.8), label='Below Average')
+above_patch = mpatches.Patch(color=cmap_red(0.8), label='Above Average')
+plt.legend(handles=[below_patch, above_patch], loc='upper right', bbox_to_anchor=(1.01, 1.1), ncol=2)
+
+
+
+# 15. Display the plot
+plt.show()
